@@ -18,14 +18,14 @@
     button:hover { background: #ffca8d; }
     :focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
     #response, #current-clue { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
-    #restart { background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; }
+    #restart, #preview-final { background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; }
     #storage-note { font-size: 14px; color: #c8c2ce; }
     #response:empty { display: none; }
     #response[data-error="true"] { border-color: #ffa5a5; }
     [hidden] { display: none !important; }
     body.is-complete { background: #eee0c5; color: #302218; }
-    body.is-complete #restart { color: #302218; border-color: #8b6236; }
-    body.is-complete #restart:focus-visible { outline-color: #302218; }
+    body.is-complete #restart, body.is-complete #preview-final { color: #302218; border-color: #8b6236; }
+    body.is-complete #restart:focus-visible, body.is-complete #preview-final:focus-visible { outline-color: #302218; }
     body.is-complete main { max-width: 640px; }
     #final-clue { min-height: calc(100svh - 96px); padding: clamp(24px, 6vw, 48px); border: 1px solid #8b6236; outline: 1px solid #8b6236; outline-offset: -8px; display: flex; flex-direction: column; justify-content: center; }
     #final-clue h1 { font-size: clamp(44px, 11vw, 68px); margin: 0 0 28px; }
@@ -55,6 +55,7 @@
       <h1 id="final-clue-heading" tabindex="-1">Final clue</h1>
       <div id="final-clue-text"></div>
     </section>
+    <button id="preview-final" type="button">View final clue (testing)</button>
     <button id="restart" type="button" hidden>Reset progress (testing)</button>
   </main>
   <script>
@@ -82,6 +83,8 @@
     const gameScreen = document.getElementById("game-screen");
     const restart = document.getElementById("restart");
     const storageNote = document.getElementById("storage-note");
+    const previewButton = document.getElementById("preview-final");
+    let previewing = false;
     let foundCount = 0;
     function storageUnavailable() {
       storageNote.hidden = false;
@@ -96,7 +99,10 @@
       catch { storageUnavailable(); }
     }
     function render() {
-      const complete = clues.length > 0 && foundCount === clues.length;
+      const finished = clues.length > 0 && foundCount === clues.length;
+      const complete = previewing || finished;
+      previewButton.hidden = finished;
+      previewButton.textContent = previewing ? "Back to clues (testing)" : "View final clue (testing)";
       progress.textContent = foundCount + " of " + clues.length + " clues found";
       currentClue.hidden = foundCount === 0;
       currentClue.textContent = foundCount ? "Clue found: " + clues[foundCount - 1].message : "";
@@ -127,9 +133,15 @@
       input.value = "";
       announce("");
     });
+    previewButton.addEventListener("click", () => {
+      previewing = !previewing;
+      render();
+      if (!previewing) input.focus();
+    });
     restart.addEventListener("click", () => {
       if (!window.confirm("Clear your progress and start again?")) return;
       foundCount = 0;
+      previewing = false;
       save();
       render();
       input.value = "";
