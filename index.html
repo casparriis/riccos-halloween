@@ -49,7 +49,7 @@
     </form>
     <div id="response" role="status" aria-live="polite" aria-atomic="true"></div>
     <noscript><p>Please enable JavaScript to reveal clues.</p></noscript>
-    <footer>Test edition · Placeholder clues</footer>
+    <footer>Test edition</footer>
     </div>
     <section id="final-clue" aria-labelledby="final-clue-heading" hidden>
       <h1 id="final-clue-heading" tabindex="-1">Final clue</h1>
@@ -59,96 +59,120 @@
     <button id="restart" type="button" hidden>Reset progress (testing)</button>
   </main>
   <script>
-    // EDIT YOUR CLUES HERE, in the order players must find them.
-    // Keep codes unique and uppercase. Backticks allow multiline messages.
-    // Escape literal backticks and ${ with a backslash in messages.
-    const clues = [
-      { code: "RAVEN42", message: `Sample clue 1 — Placeholder: write the clue leading to the MOON17 location here.` },
-      { code: "MOON17", message: `Sample clue 2 — Placeholder: write the clue leading to the SHADOW9 location here.` },
-      { code: "SHADOW9", message: `Sample clue 3 — Placeholder: write the last clue's message here.` }
-    ];
-    const finalClue = `Final clue — Placeholder: write your mystery's ending here.`;
-    // Change this for a new game to reset previously saved progress.
-    const gameVersion = "halloween-v2";
-    const storageKey = "riccos-mystery:" + gameVersion + ":" + clues.map(clue => clue.code).join("|");
-
-    const form = document.getElementById("clue-form");
-    const input = document.getElementById("code");
-    const response = document.getElementById("response");
-    const progress = document.getElementById("progress");
-    const currentClue = document.getElementById("current-clue");
-    const ending = document.getElementById("final-clue");
-    const endingText = document.getElementById("final-clue-text");
-    const endingHeading = document.getElementById("final-clue-heading");
-    const gameScreen = document.getElementById("game-screen");
-    const restart = document.getElementById("restart");
-    const storageNote = document.getElementById("storage-note");
-    const previewButton = document.getElementById("preview-final");
-    let previewing = false;
-    let foundCount = 0;
-    function storageUnavailable() {
-      storageNote.hidden = false;
-      storageNote.textContent = "This browser cannot save progress. Keep this page open while playing.";
-    }
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey));
-      if (Number.isInteger(saved) && saved >= 0 && saved <= clues.length) foundCount = saved;
-    } catch { storageUnavailable(); }
-    function save() {
-      try { localStorage.setItem(storageKey, JSON.stringify(foundCount)); }
-      catch { storageUnavailable(); }
-    }
-    function render() {
-      const finished = clues.length > 0 && foundCount === clues.length;
-      const complete = previewing || finished;
-      previewButton.hidden = finished;
-      previewButton.textContent = previewing ? "Back to clues (testing)" : "View final clue (testing)";
-      progress.textContent = foundCount + " of " + clues.length + " clues found";
-      currentClue.hidden = foundCount === 0;
-      currentClue.textContent = foundCount ? "Clue found: " + clues[foundCount - 1].message : "";
-      ending.hidden = !complete;
-      endingText.textContent = complete ? finalClue : "";
-      gameScreen.hidden = complete;
-      document.body.classList.toggle("is-complete", complete);
-      if (complete) endingHeading.focus();
-      form.hidden = complete;
-      restart.hidden = foundCount === 0;
-    }
-    function announce(message, error = false) {
-      response.textContent = message;
-      response.dataset.error = String(error);
-      input.setAttribute("aria-invalid", String(error));
-    }
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const code = input.value.trim().toUpperCase();
-      const index = clues.findIndex(clue => clue.code === code);
-      if (!code) return announce("Please enter a code.", true);
-      if (index < 0) return announce("Code not recognised. Check it and try again.", true);
-      if (index < foundCount) return announce("You have already found that clue. Follow your current clue above.");
-      if (index > foundCount) return announce("That clue comes later. Follow your current clue first.", true);
-      foundCount++;
-      save();
-      render();
-      input.value = "";
-      announce("");
-    });
-    previewButton.addEventListener("click", () => {
-      previewing = !previewing;
-      render();
-      if (!previewing) input.focus();
-    });
-    restart.addEventListener("click", () => {
-      if (!window.confirm("Clear your progress and start again?")) return;
-      foundCount = 0;
-      previewing = false;
-      save();
-      render();
-      input.value = "";
-      announce("");
-      input.focus();
-    });
-    render();
+    // Clue content lives only in clues.json. Edit that file, not this script.
+    (async () => {
+      const el = id => document.getElementById(id);
+      const form = el("clue-form"), input = el("code"), response = el("response");
+      const progress = el("progress"), currentClue = el("current-clue");
+      const ending = el("final-clue"), endingText = el("final-clue-text");
+      const gameScreen = el("game-screen"), restart = el("restart");
+      const previewButton = el("preview-final"), storageNote = el("storage-note");
+      const normalize = code => code.trim().replace(/\s+/g, " ").toUpperCase();
+      let ready = false, previewing = false, found = [], data, byId, storageKey;
+      form.hidden = true;
+      previewButton.hidden = true;
+      progress.textContent = "Loading clues…";
+      function announce(message, error = false) {
+        response.textContent = message;
+        response.dataset.error = String(error);
+        input.setAttribute("aria-invalid", String(error));
+      }
+      function storageUnavailable() {
+        storageNote.hidden = false;
+        storageNote.textContent = "This browser cannot save progress. Keep this page open while playing.";
+      }
+      function save() {
+        try { localStorage.setItem(storageKey, JSON.stringify(found)); }
+        catch { storageUnavailable(); }
+      }
+      function render() {
+        const finished = found.length === data.clues.length;
+        const complete = previewing || finished;
+        const last = found.length ? byId.get(found[found.length - 1]) : null;
+        progress.textContent = found.length + " of " + data.clues.length + " clues found";
+        currentClue.hidden = !last;
+        currentClue.textContent = last ? "Clue found: " + byId.get(last.next).clue : "";
+        ending.hidden = !complete;
+        endingText.textContent = complete ? data.finalClue : "";
+        gameScreen.hidden = complete;
+        form.hidden = complete;
+        document.body.classList.toggle("is-complete", complete);
+        previewButton.hidden = finished;
+        previewButton.textContent = previewing ? "Back to clues (testing)" : "View final clue (testing)";
+        restart.hidden = found.length === 0;
+        if (complete) el("final-clue-heading").focus();
+      }
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        if (!ready) return;
+        const code = normalize(input.value);
+        if (!code) return announce("Please enter a code.", true);
+        const clue = data.clues.find(c => c.code !== null && normalize(c.code) === code);
+        if (!clue) return announce("Code not recognised. Check it and try again.", true);
+        if (found.includes(clue.id)) return announce("You have already found that clue. Follow your current clue above.");
+        found.push(clue.id);
+        save();
+        render();
+        input.value = "";
+        announce("");
+      });
+      previewButton.addEventListener("click", () => {
+        if (!ready) return;
+        previewing = !previewing;
+        render();
+        if (!previewing) input.focus();
+      });
+      restart.addEventListener("click", () => {
+        if (!ready || !window.confirm("Clear your progress and start again?")) return;
+        found = [];
+        previewing = false;
+        save();
+        render();
+        input.value = "";
+        announce("");
+        input.focus();
+      });
+      try {
+        const result = await fetch("./clues.json", { cache: "no-store" });
+        if (!result.ok) throw Error("Could not load clues.json");
+        data = await result.json();
+        if (!data || typeof data.gameVersion !== "string" || !data.gameVersion.trim() ||
+            typeof data.finalClue !== "string" || !data.finalClue.trim() ||
+            !Array.isArray(data.clues) || !data.clues.length) throw Error("Invalid game settings");
+        const ids = new Set(), codes = new Set();
+        for (const c of data.clues) {
+          if (!c || typeof c.id !== "string" || !c.id.trim() || ids.has(c.id) ||
+              typeof c.clue !== "string" || !c.clue.trim() || typeof c.next !== "string" ||
+              typeof c.starter !== "boolean") throw Error("Invalid clue");
+          ids.add(c.id);
+          if (c.code !== null) {
+            if (typeof c.code !== "string" || !normalize(c.code) || codes.has(normalize(c.code)))
+              throw Error("Invalid or duplicate code");
+            codes.add(normalize(c.code));
+          }
+        }
+        byId = new Map(data.clues.map(c => [c.id, c]));
+        if (data.clues.some(c => !byId.has(c.next)) || !data.clues.some(c => c.starter))
+          throw Error("Missing next clue or starter");
+        const visited = new Set();
+        let next = data.clues[0].id;
+        while (!visited.has(next)) { visited.add(next); next = byId.get(next).next; }
+        if (visited.size !== data.clues.length || next !== data.clues[0].id)
+          throw Error("Clues must form one circular route");
+        storageKey = "riccos-mystery:" + data.gameVersion + ":" +
+          JSON.stringify(data.clues.map(c => [c.id, c.code, c.next]));
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey));
+          if (Array.isArray(saved)) found = [...new Set(saved.filter(id => byId.has(id)))];
+        } catch { storageUnavailable(); }
+        ready = true;
+        render();
+      } catch (error) {
+        progress.textContent = "";
+        announce("The clues could not be loaded. Please reload the page or ask the host to check clues.json.", true);
+        console.error("Clue configuration:", error);
+      }
+    })();
   </script>
 </body>
 </html>
