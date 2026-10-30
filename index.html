@@ -8,7 +8,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; padding: 48px 20px; background: #14131a; color: #f7f1e7; font: 18px/1.6 system-ui, sans-serif; }
     main { width: 100%; max-width: 480px; margin: 0 auto; }
-    .eyebrow { color: #efb575; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+    .skull-logo { display: block; width: 160px; height: 160px; object-fit: contain; margin: 0 0 24px; }
     h1 { font: 400 clamp(36px, 9vw, 48px)/1.1 Georgia, serif; margin: 16px 0; }
     .intro { color: #c8c2ce; margin-bottom: 32px; }
     label { display: block; margin-bottom: 8px; font-weight: 600; }
@@ -36,10 +36,11 @@
 <body>
   <main>
     <div id="game-screen">
+    <img class="skull-logo" src="skull-white.png" alt="Ricco’s skull" width="160" height="160">
     <h1>Solve the Mystery</h1>
     <p class="intro">Found a code? Enter it below to reveal your clue.</p>
     <p id="progress" role="status" aria-live="polite"></p>
-    <p id="storage-note">Progress is remembered on this browser. Use the same phone throughout.</p>
+    <p id="storage-note" hidden></p>
     <div id="current-clue" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     <form id="clue-form" novalidate>
       <label for="code">Your code</label>
@@ -83,6 +84,7 @@
     const storageNote = document.getElementById("storage-note");
     let foundCount = 0;
     function storageUnavailable() {
+      storageNote.hidden = false;
       storageNote.textContent = "This browser cannot save progress. Keep this page open while playing.";
     }
     try {
