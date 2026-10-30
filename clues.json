@@ -1,0 +1,114 @@
+{
+  "gameVersion": "halloween-2026-vault-1",
+  "finalClue": "[TO COMPLETE: Write the final clue telling guests the passphrase to give to the host wearing the panther mask. The passphrase is not yet specified in the Vault.]",
+  "clues": [
+    {
+      "id": "01",
+      "clue": "Find the roman equivalent of Athena",
+      "code": "WISDOM",
+      "next": "02",
+      "starter": true,
+      "location": "Minerva statue, on the bookcase",
+      "answer": "Written on the minerva statue"
+    },
+    {
+      "id": "02",
+      "clue": "The laughing old lady has red flowers in her hair",
+      "code": "ROSEBUD",
+      "next": "03",
+      "starter": false,
+      "location": "Photo of old lady by the entrance",
+      "answer": "Code written on the frame"
+    },
+    {
+      "id": "03",
+      "clue": "The witch with the red rose, what's her favourite spell?",
+      "code": "ABRACADABRA",
+      "next": "04",
+      "starter": false,
+      "location": "Adriana, somewhere in the cafe",
+      "answer": "Adriana will tell them"
+    },
+    {
+      "id": "04",
+      "clue": "This skeleton had his mind blown",
+      "code": "HEADLESS",
+      "next": "05",
+      "starter": true,
+      "location": "Headless skeleton doll near the bar",
+      "answer": "Written on the skeleton doll"
+    },
+    {
+      "id": "05",
+      "clue": "There's a monster in the monstera",
+      "code": "ROOTS",
+      "next": "06",
+      "starter": false,
+      "location": "Proposed plant pot (exact pot/location to be confirmed)",
+      "answer": "Written on the demon figure"
+    },
+    {
+      "id": "06",
+      "clue": "Cocktail menu. Red letters",
+      "code": null,
+      "next": "07",
+      "starter": false,
+      "location": "Cocktail menu on the bar",
+      "answer": "Red letters spell a word"
+    },
+    {
+      "id": "07",
+      "clue": "Find [Title], [page] [word]",
+      "code": null,
+      "next": "08",
+      "starter": false,
+      "location": "Bookcase",
+      "answer": "The specified word from the book"
+    },
+    {
+      "id": "08",
+      "clue": "Comment on the bartender's eyes",
+      "code": "SAPPHIRE",
+      "next": "09",
+      "starter": false,
+      "location": "Sebastian behind the bar",
+      "answer": "Seb will tell them the clue"
+    },
+    {
+      "id": "09",
+      "clue": "A pyramid of skulls",
+      "code": "MORTAL",
+      "next": "10",
+      "starter": false,
+      "location": "Skull pyramid ornament near the entrance",
+      "answer": "Written on the skull ornament"
+    },
+    {
+      "id": "10",
+      "clue": "Two men dancing in ink",
+      "code": "TANGO",
+      "next": "11",
+      "starter": true,
+      "location": "Drawing in back room",
+      "answer": "A word written on the frame"
+    },
+    {
+      "id": "11",
+      "clue": "What's the origin of the white magic",
+      "code": "COSTA RICA",
+      "next": "12",
+      "starter": false,
+      "location": "White Magic Coffee pot, on the bar",
+      "answer": "Costa Rica - Found on the packaging"
+    },
+    {
+      "id": "12",
+      "clue": "The woman with a hole in her belly - what's in the hole",
+      "code": "CANDLE",
+      "next": "01",
+      "starter": false,
+      "location": "Painting in main room",
+      "answer": "It's a candle"
+    }
+  ]
+}
