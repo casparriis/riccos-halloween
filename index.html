@@ -36,12 +36,11 @@
 <body>
   <main>
     <div id="game-screen">
-    <p class="eyebrow">Ricco's Café · Halloween</p>
-    <h1>The mystery awaits.</h1>
+    <h1>Solve the Mystery</h1>
     <p class="intro">Found a code? Enter it below to reveal your clue.</p>
     <p id="progress" role="status" aria-live="polite"></p>
     <p id="storage-note">Progress is remembered on this browser. Use the same phone throughout.</p>
-    <div id="current-clue" hidden></div>
+    <div id="current-clue" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     <form id="clue-form" novalidate>
       <label for="code">Your code</label>
       <input id="code" name="code" type="text" placeholder="Enter code" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="response">
@@ -98,7 +97,7 @@
       const complete = clues.length > 0 && foundCount === clues.length;
       progress.textContent = foundCount + " of " + clues.length + " clues found";
       currentClue.hidden = foundCount === 0;
-      currentClue.textContent = foundCount ? clues[foundCount - 1].message : "";
+      currentClue.textContent = foundCount ? "Clue found: " + clues[foundCount - 1].message : "";
       ending.hidden = !complete;
       endingText.textContent = complete ? finalClue : "";
       gameScreen.hidden = complete;
@@ -124,7 +123,7 @@
       save();
       render();
       input.value = "";
-      announce(foundCount === clues.length ? "" : "Clue found! Follow the clue above to continue.");
+      announce("");
     });
     restart.addEventListener("click", () => {
       if (!window.confirm("Clear your progress and start again?")) return;
