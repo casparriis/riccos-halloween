@@ -1,4 +1,4 @@
-# Ricco's Halloween mystery — test site
+# Ricco's Halloween mystery — version 2
 
 Open `index.html` in a browser to try it. Everything is in this one file; no installation or server is required. Press **Reveal clue** or Enter after typing a code.
 
@@ -8,13 +8,17 @@ Open `index.html` in a browser to try it. Everything is in this one file; no ins
 | MOON17 | Sample clue 2 — Placeholder: replace this with your own clue for MOON17. |
 | SHADOW9 | Sample clue 3 — Placeholder: replace this with your own clue for SHADOW9. |
 
+Follow one sequence: **RAVEN42 → MOON17 → SHADOW9**. Each code reveals the clue leading to the next location. Give players the first location separately. The final message appears only after all three codes have been found in order. Re-entering a found code does not count again; later codes cannot be skipped to.
+
+The page shows the number of clues found and saves progress in this browser's local storage. Reloading restores the latest clue and, after completion, the ending. Use the same device/browser throughout; private browsing, clearing site data, or switching devices can lose progress. No progress is sent to a server. If storage is unavailable, a notice appears and the game still works while the page stays open. **Start again** clears progress after confirmation.
+
 Codes ignore letter case and spaces at the beginning/end. Unknown codes show an error; empty input asks for a code.
 
 ## Edit the clues
 
-Open `index.html` in a text editor and find `EDIT YOUR CLUES HERE`. Change the three placeholder messages in the `clues` object. Add more entries using the same format, with a comma between entries. Keep codes uppercase. Messages can span lines inside backticks; escape a literal backtick or `${` with a backslash. Save and reload the browser. Text is displayed as plain text, not HTML.
+Open `index.html` in a text editor and find `EDIT YOUR CLUES HERE`. Change the three placeholder messages in the `clues` array. Add more entries using the same format, with a comma between entries. The array order is the game order. Keep codes unique and uppercase. Edit `finalMessage` for the ending. The total clue count is calculated automatically. Change `gameVersion` when starting a fresh event; changing code order also starts fresh progress. Messages can span lines inside backticks; escape a literal backtick or `${` with a backslash. Save and reload the browser. Text is displayed as plain text, not HTML.
 
-There are no accounts, cookies, progress tracking, database, analytics, external fonts or dependencies. All codes and messages are delivered to the browser and can be read in the page source: this is a simple clue reveal, not a way to keep clues secret from someone inspecting the file.
+There are no accounts, cookies, server-side tracking, database, analytics, external fonts or dependencies. All codes and messages are delivered to the browser and can be read in the page source: this is a simple clue reveal, not a way to keep clues secret from someone inspecting the file.
 
 ## Publish free with GitHub Pages
 
