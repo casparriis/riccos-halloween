@@ -17,16 +17,23 @@
     button { margin-top: 14px; padding: 12px 16px; border: 0; background: #efb575; color: #21180d; font-weight: 700; cursor: pointer; }
     button:hover { background: #ffca8d; }
     :focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
-    #response, #current-clue, #final-message { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #response, #current-clue { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
     #restart { background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; }
     #storage-note { font-size: 14px; color: #c8c2ce; }
     #response:empty { display: none; }
     #response[data-error="true"] { border-color: #ffa5a5; }
+    [hidden] { display: none !important; }
+    body.is-complete { background: #eee0c5; color: #302218; }
+    body.is-complete main { max-width: 640px; }
+    #final-clue { min-height: calc(100svh - 96px); padding: clamp(24px, 6vw, 48px); border: 1px solid #8b6236; outline: 1px solid #8b6236; outline-offset: -8px; display: flex; flex-direction: column; justify-content: center; }
+    #final-clue h1 { font-size: clamp(44px, 11vw, 68px); margin: 0 0 28px; }
+    #final-clue-text { white-space: pre-wrap; overflow-wrap: anywhere; font: 22px/1.7 Georgia, serif; }
     footer { color: #aaa2b3; font-size: 13px; margin-top: 36px; }
   </style>
 </head>
 <body>
   <main>
+    <div id="game-screen">
     <p class="eyebrow">Ricco's Café · Halloween</p>
     <h1>The mystery awaits.</h1>
     <p class="intro">Found a code? Enter it below to reveal your clue.</p>
@@ -39,10 +46,14 @@
       <button type="submit">Reveal clue</button>
     </form>
     <div id="response" role="status" aria-live="polite" aria-atomic="true"></div>
-    <section id="final-message" aria-label="Final message" aria-live="polite" hidden></section>
     <button id="restart" type="button" hidden>Start again</button>
     <noscript><p>Please enable JavaScript to reveal clues.</p></noscript>
     <footer>Test edition · Placeholder clues</footer>
+    </div>
+    <section id="final-clue" aria-labelledby="final-clue-heading" hidden>
+      <h1 id="final-clue-heading" tabindex="-1">Final clue</h1>
+      <div id="final-clue-text"></div>
+    </section>
   </main>
   <script>
     // EDIT YOUR CLUES HERE, in the order players must find them.
@@ -53,7 +64,7 @@
       { code: "MOON17", message: `Sample clue 2 — Placeholder: write the clue leading to the SHADOW9 location here.` },
       { code: "SHADOW9", message: `Sample clue 3 — Placeholder: write the last clue's message here.` }
     ];
-    const finalMessage = `Final message — Placeholder: write your mystery's ending here.`;
+    const finalClue = `Final clue — Placeholder: write your mystery's ending here.`;
     // Change this for a new game to reset previously saved progress.
     const gameVersion = "halloween-v2";
     const storageKey = "riccos-mystery:" + gameVersion + ":" + clues.map(clue => clue.code).join("|");
@@ -63,7 +74,10 @@
     const response = document.getElementById("response");
     const progress = document.getElementById("progress");
     const currentClue = document.getElementById("current-clue");
-    const ending = document.getElementById("final-message");
+    const ending = document.getElementById("final-clue");
+    const endingText = document.getElementById("final-clue-text");
+    const endingHeading = document.getElementById("final-clue-heading");
+    const gameScreen = document.getElementById("game-screen");
     const restart = document.getElementById("restart");
     const storageNote = document.getElementById("storage-note");
     let foundCount = 0;
@@ -84,7 +98,10 @@
       currentClue.hidden = foundCount === 0;
       currentClue.textContent = foundCount ? clues[foundCount - 1].message : "";
       ending.hidden = !complete;
-      ending.textContent = complete ? finalMessage : "";
+      endingText.textContent = complete ? finalClue : "";
+      gameScreen.hidden = complete;
+      document.body.classList.toggle("is-complete", complete);
+      if (complete) endingHeading.focus();
       form.hidden = complete;
       restart.hidden = foundCount === 0;
     }
@@ -105,7 +122,7 @@
       save();
       render();
       input.value = "";
-      announce(foundCount === clues.length ? "All clues found! Your final message is below." : "Clue found! Follow the clue above to continue.");
+      announce(foundCount === clues.length ? "" : "Clue found! Follow the clue above to continue.");
     });
     restart.addEventListener("click", () => {
       if (!window.confirm("Clear your progress and start again?")) return;
