@@ -17,7 +17,9 @@
     button { margin-top: 14px; padding: 12px 16px; border: 0; background: #efb575; color: #21180d; font-weight: 700; cursor: pointer; }
     button:hover { background: #ffca8d; }
     :focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
-    #response { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #response, #current-clue, #final-message { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #restart { background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; }
+    #storage-note { font-size: 14px; color: #c8c2ce; }
     #response:empty { display: none; }
     #response[data-error="true"] { border-color: #ffa5a5; }
     footer { color: #aaa2b3; font-size: 13px; margin-top: 36px; }
@@ -28,38 +30,93 @@
     <p class="eyebrow">Ricco's Café · Halloween</p>
     <h1>The mystery awaits.</h1>
     <p class="intro">Found a code? Enter it below to reveal your clue.</p>
+    <p id="progress" role="status" aria-live="polite"></p>
+    <p id="storage-note">Progress is remembered on this browser. Use the same phone throughout.</p>
+    <div id="current-clue" hidden></div>
     <form id="clue-form" novalidate>
       <label for="code">Your code</label>
       <input id="code" name="code" type="text" placeholder="Enter code" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="response">
       <button type="submit">Reveal clue</button>
     </form>
     <div id="response" role="status" aria-live="polite" aria-atomic="true"></div>
+    <section id="final-message" aria-label="Final message" aria-live="polite" hidden></section>
+    <button id="restart" type="button" hidden>Start again</button>
     <noscript><p>Please enable JavaScript to reveal clues.</p></noscript>
     <footer>Test edition · Placeholder clues</footer>
   </main>
   <script>
-    // EDIT YOUR CLUES HERE. Keep codes uppercase and inside quotes.
-    // Each sample below is a placeholder, not part of the finished mystery.
-    // Backticks allow messages to span several lines. Avoid literal backticks
-    // and the sequence ${ in messages unless you escape them with a backslash.
-    const clues = {
-      "RAVEN42": `Sample clue 1 — Placeholder: replace this with your own clue for RAVEN42.`,
-      "MOON17": `Sample clue 2 — Placeholder: replace this with your own clue for MOON17.`,
-      "SHADOW9": `Sample clue 3 — Placeholder: replace this with your own clue for SHADOW9.`
-    };
+    // EDIT YOUR CLUES HERE, in the order players must find them.
+    // Keep codes unique and uppercase. Backticks allow multiline messages.
+    // Escape literal backticks and ${ with a backslash in messages.
+    const clues = [
+      { code: "RAVEN42", message: `Sample clue 1 — Placeholder: write the clue leading to the MOON17 location here.` },
+      { code: "MOON17", message: `Sample clue 2 — Placeholder: write the clue leading to the SHADOW9 location here.` },
+      { code: "SHADOW9", message: `Sample clue 3 — Placeholder: write the last clue's message here.` }
+    ];
+    const finalMessage = `Final message — Placeholder: write your mystery's ending here.`;
+    // Change this for a new game to reset previously saved progress.
+    const gameVersion = "halloween-v2";
+    const storageKey = "riccos-mystery:" + gameVersion + ":" + clues.map(clue => clue.code).join("|");
 
     const form = document.getElementById("clue-form");
     const input = document.getElementById("code");
     const response = document.getElementById("response");
+    const progress = document.getElementById("progress");
+    const currentClue = document.getElementById("current-clue");
+    const ending = document.getElementById("final-message");
+    const restart = document.getElementById("restart");
+    const storageNote = document.getElementById("storage-note");
+    let foundCount = 0;
+    function storageUnavailable() {
+      storageNote.textContent = "This browser cannot save progress. Keep this page open while playing.";
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey));
+      if (Number.isInteger(saved) && saved >= 0 && saved <= clues.length) foundCount = saved;
+    } catch { storageUnavailable(); }
+    function save() {
+      try { localStorage.setItem(storageKey, JSON.stringify(foundCount)); }
+      catch { storageUnavailable(); }
+    }
+    function render() {
+      const complete = clues.length > 0 && foundCount === clues.length;
+      progress.textContent = foundCount + " of " + clues.length + " clues found";
+      currentClue.hidden = foundCount === 0;
+      currentClue.textContent = foundCount ? clues[foundCount - 1].message : "";
+      ending.hidden = !complete;
+      ending.textContent = complete ? finalMessage : "";
+      form.hidden = complete;
+      restart.hidden = foundCount === 0;
+    }
+    function announce(message, error = false) {
+      response.textContent = message;
+      response.dataset.error = String(error);
+      input.setAttribute("aria-invalid", String(error));
+    }
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       const code = input.value.trim().toUpperCase();
-      const found = Object.prototype.hasOwnProperty.call(clues, code);
-      response.textContent = found ? clues[code] :
-        (code ? "Code not recognised. Check it and try again." : "Please enter a code.");
-      response.dataset.error = String(!found);
-      input.setAttribute("aria-invalid", String(!found));
+      const index = clues.findIndex(clue => clue.code === code);
+      if (!code) return announce("Please enter a code.", true);
+      if (index < 0) return announce("Code not recognised. Check it and try again.", true);
+      if (index < foundCount) return announce("You have already found that clue. Follow your current clue above.");
+      if (index > foundCount) return announce("That clue comes later. Follow your current clue first.", true);
+      foundCount++;
+      save();
+      render();
+      input.value = "";
+      announce(foundCount === clues.length ? "All clues found! Your final message is below." : "Clue found! Follow the clue above to continue.");
     });
+    restart.addEventListener("click", () => {
+      if (!window.confirm("Clear your progress and start again?")) return;
+      foundCount = 0;
+      save();
+      render();
+      input.value = "";
+      announce("");
+      input.focus();
+    });
+    render();
   </script>
 </body>
 </html>
