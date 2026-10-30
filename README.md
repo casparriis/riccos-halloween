@@ -1,39 +1,44 @@
-# Ricco's Halloween mystery — version 2
+# Ricco's mystery — editing guide
 
-Open `index.html` in a browser to try it. Everything is in this one file; no installation or server is required. Press **Reveal clue** or Enter after typing a code.
+## Edit clues and codes
+The website's single source is [clues.json](clues.json). There are no clue texts or codes in index.html.
 
-| Sample code | Placeholder response |
-| --- | --- |
-| RAVEN42 | Sample clue 1 — Placeholder: replace this with your own clue for RAVEN42. |
-| MOON17 | Sample clue 2 — Placeholder: replace this with your own clue for MOON17. |
-| SHADOW9 | Sample clue 3 — Placeholder: replace this with your own clue for SHADOW9. |
+1. Open [clues.json on GitHub](https://github.com/casparriis/riccos-halloween/blob/main/clues.json).
+2. Click the pencil (Edit this file).
+3. Change the text inside quotes for `clue`, `code` or `finalClue`.
+4. Click **Commit changes** and save to **main**.
+5. Wait for GitHub Pages to update, then reload the website.
 
-Follow one sequence: **RAVEN42 → MOON17 → SHADOW9**. Each code reveals the clue leading to the next location. Give players the first location separately. The final clue appears only after all three codes have been found in order. It replaces the entire game screen with a parchment-coloured page, a large Final clue heading and the final clue text. Completed progress restores this screen on reload. Re-entering a found code does not count again; later codes cannot be skipped to.
+The Vault table was imported from [Halloween party 2026 — Mystery treasure hunt](https://drive.google.com/file/d/1izvENFt8eHRpfla2ZNx-1xTj_0wB3LP1/view). That note remains unchanged as the source reference. Future website edits belong in this JSON; editing the Vault does not automatically update the site. No separate editable Drive copy is used.
 
-The page shows the number of clues found and saves progress in this browser's local storage. Reloading restores the latest clue and, after completion, the ending. Use the same device/browser throughout; private browsing, clearing site data, or switching devices can lose progress. No progress is sent to a server. If storage is unavailable, a notice appears and the game still works while the page stays open. **Reset progress (testing)** is available during the game and on the final clue screen. Confirm the reset to clear saved progress and return to the beginning. Cancel keeps your progress. Change `gameVersion` to start a fresh event for everyone.
+## What each field means
+- `gameVersion`: change this to reset everyone's saved progress for a new game.
+- `finalClue`: the full-page clue revealed when all unique codes are found.
+- `id`: a unique clue number, kept as text, such as "01".
+- `clue`: the instruction that leads players to this clue's location.
+- `code`: the answer found at this location. Use a unique word or phrase; case and extra spaces are ignored. Use `null` for a code not decided yet.
+- `next`: the ID of the clue displayed after this code is entered. For example WISDOM belongs to 01 and displays the text of 02.
+- `starter`: true for the clues you can hand out as starting cards (01, 04, 10).
+- `location` and `answer`: reference notes from the table; these are not displayed on the game page.
 
-Codes ignore letter case and spaces at the beginning/end. Unknown codes show an error; empty input asks for a code.
+All entries must form one circular route. Every valid unique code counts once, regardless of starting point. Duplicate entries do not count twice. The total is calculated from the JSON. Code/route changes reset saved progress; text-only changes keep it.
 
-## Edit the clues
+## Still to finish
+- Codes for 06 (cocktail menu) and 07 (book) are `null`. Replace them with quoted codes. They do not accept "TBD" and still count towards the total, so completion is blocked until they are filled in.
+- Clue 07 still contains [Title], [page] and [word].
+- The plant-pot location/answer is provisional.
+- The other codewords are proposed in the Vault except CANDLE and COSTA RICA.
+- The final passphrase is unspecified. Replace the clearly marked `finalClue` placeholder with your text before the event.
 
-Open `index.html` in a text editor and find `EDIT YOUR CLUES HERE`. Change the three placeholder messages in the `clues` array. Add more entries using the same format, with a comma between entries. The array order is the game order. Keep codes unique and uppercase. Edit `finalClue` for the ending. The total clue count is calculated automatically. Change `gameVersion` when starting a fresh event; changing code order also starts fresh progress. Messages can span lines inside backticks; escape a literal backtick or `${` with a backslash. Save and reload the browser. Text is displayed as plain text, not HTML.
+## JSON tips
+Keep double quotes around text, commas between entries, and no comma after the last entry. Write `\n` inside a text string for a new line; escape quotes inside text as `\"`. Do not add comments. Invalid JSON, duplicate codes or broken links show a loading error rather than silently using old clues.
 
-There are no accounts, cookies, server-side tracking, database, analytics, external fonts or dependencies. All codes and messages are delivered to the browser and can be read in the page source: this is a simple clue reveal, not a way to keep clues secret from someone inspecting the file.
+## Test and hosting
+Open [the website](https://casparriis.github.io/riccos-halloween/). Because it loads a separate JSON file, opening index.html directly from disk is no longer supported; use GitHub Pages or a local HTTP server.
 
-## Publish free with GitHub Pages
+**View final clue (testing)** previews the ending without changing progress; **Back to clues (testing)** returns. **Reset progress (testing)** clears progress after confirmation. Remove testing controls before the event if players should not preview the ending.
 
-These steps were checked against official GitHub documentation on 30 October 2026. Uploading these files does not by itself enable GitHub Pages.
+Progress stays in this browser's local storage. There are no accounts, database or analytics. All JSON contents, including reference notes and answers, are publicly readable as part of the static site.
 
-1. Sign in to GitHub. Use **+ → New repository**.
-2. Name it `riccos-halloween`, select **Public** (needed for Pages on GitHub Free), enable **Add a README file**, and choose **Create repository**.
-3. In the repository, select **Add file → Upload files**. Upload `index.html` directly to the repository's top level, not inside another folder. Choose **Commit changes** to save it on `main`. Uploading this README is optional.
-4. Open the repository's **Settings → Pages**.
-5. Under **Build and deployment**, set **Source** to **Deploy from a branch**. Choose **main** and **/(root)**, then **Save**.
-6. Wait for deployment. Revisit **Settings → Pages** and use **Visit site** once available. The address will normally be `https://YOUR-USERNAME.github.io/riccos-halloween/`. Share the actual address shown by GitHub with players.
-7. Test all three sample codes on your phone. Later, edit/upload `index.html` and commit to `main` to publish updated clues automatically. Allow deployment to finish and reload the page.
-
-Official references:
-- [Create a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
-- [Configure the publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
-
-
+GitHub Pages uses **Settings → Pages → Deploy from a branch → main → /(root)**.
+[Official publishing instructions](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
