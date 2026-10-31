@@ -14,6 +14,8 @@ The Vault table was imported from [Halloween party 2026 — Mystery treasure hun
 ## What each field means
 - `gameVersion`: change this to reset everyone's saved progress for a new game.
 - `finalClue`: the full-page clue revealed when all unique codes are found.
+- `finalAnswerPrompt`, `acceptedAnswers` and `successMessage`: the answer field label, accepted identities, and completion text.
+- `notificationEmail`: the approved public recipient address for correct-answer notifications. FormSubmit requires activation from its email before delivery works. Wrong answers do not send a notification; the same browser remembers a successful notification until progress is reset.
 - `id`: a unique clue number, kept as text, such as "01".
 - `clue`: the instruction that leads players to this clue's location.
 - `code`: the answer found at this location. Use a unique word or phrase; case and extra spaces are ignored. Use `null` for a code not decided yet.
@@ -23,20 +25,15 @@ The Vault table was imported from [Halloween party 2026 — Mystery treasure hun
 
 All entries must form one circular route. Every valid unique code counts once, regardless of starting point. Duplicate entries do not count twice. The total is calculated from the JSON. Code/route changes reset saved progress; text-only changes keep it.
 
-## Still to finish
-- Codes for 06 (cocktail menu) and 07 (book) are `null`. Replace them with quoted codes. They do not accept "TBD" and still count towards the total, so completion is blocked until they are filled in.
-- Clue 07 still contains [Title], [page] and [word].
-- The plant-pot location/answer is provisional.
-- The other codewords are proposed in the Vault except CANDLE and COSTA RICA.
-- The final passphrase is unspecified. Replace the clearly marked `finalClue` placeholder with your text before the event.
-
 ## JSON tips
 Keep double quotes around text, commas between entries, and no comma after the last entry. Write `\n` inside a text string for a new line; escape quotes inside text as `\"`. Do not add comments. Invalid JSON, duplicate codes or broken links show a loading error rather than silently using old clues.
 
-## Test and hosting
+## Hosting and progress
 Open [the website](https://casparriis.github.io/riccos-halloween/). Because it loads a separate JSON file, opening index.html directly from disk is no longer supported; use GitHub Pages or a local HTTP server.
 
-**View final clue (testing)** previews the ending without changing progress; **Back to clues (testing)** returns. **Reset progress (testing)** clears progress after confirmation. Remove testing controls before the event if players should not preview the ending.
+The final clue unlocks only after all unique codes have been found. Testing and preview controls have been removed.
+
+A small **Reset progress** button is available at the bottom once a player has found a clue, including on the final screen. It asks for confirmation before clearing this device’s found clues and saved notification state. Cancelling changes nothing. Reloading normally restores progress and is the first thing to try if a page is stuck.
 
 Progress stays in this browser's local storage. There are no accounts, database or analytics. All JSON contents, including reference notes and answers, are publicly readable as part of the static site.
 
