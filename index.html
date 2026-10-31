@@ -18,14 +18,14 @@
     button:hover { background: #ffca8d; }
     :focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
     #response, #current-clue { margin-top: 28px; padding: 20px; border-left: 3px solid #efb575; background: #211e29; white-space: pre-wrap; overflow-wrap: anywhere; }
-    #restart, #preview-final { background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; }
+    #restart { display: block; width: auto; min-height: 44px; margin: 32px auto 0; padding: 8px 16px; background: transparent; color: #c8c2ce; border: 1px solid #81788b; font-size: 14px; font-weight: 400; }
     #storage-note { font-size: 14px; color: #c8c2ce; }
     #response:empty { display: none; }
     #response[data-error="true"] { border-color: #ffa5a5; }
     [hidden] { display: none !important; }
     body.is-complete { background: #eee0c5; color: #302218; }
-    body.is-complete #restart, body.is-complete #preview-final { color: #302218; border-color: #8b6236; }
-    body.is-complete #restart:focus-visible, body.is-complete #preview-final:focus-visible { outline-color: #302218; }
+    body.is-complete #restart { color: #302218; border-color: #8b6236; }
+    body.is-complete #restart:focus-visible { outline-color: #302218; }
     body.is-complete main { max-width: 640px; }
     #final-clue { min-height: calc(100svh - 96px); padding: clamp(24px, 6vw, 48px); border: 1px solid #8b6236; outline: 1px solid #8b6236; outline-offset: -8px; display: flex; flex-direction: column; justify-content: center; }
     #final-clue h1 { font-size: clamp(44px, 11vw, 68px); margin: 0 0 28px; }
@@ -37,7 +37,6 @@
     #answer-submit:disabled { opacity: .65; cursor: wait; }
     #answer-response { margin-bottom: 0; }
     #final-clue :focus-visible { outline-color: #302218; }
-    footer { color: #aaa2b3; font-size: 13px; margin-top: 36px; }
   </style>
 </head>
 <body>
@@ -56,7 +55,6 @@
     </form>
     <div id="response" role="status" aria-live="polite" aria-atomic="true"></div>
     <noscript><p>Please enable JavaScript to reveal clues.</p></noscript>
-    <footer>Test edition</footer>
     </div>
     <section id="final-clue" aria-labelledby="final-clue-heading" hidden>
       <h1 id="final-clue-heading" tabindex="-1">Final clue</h1>
@@ -68,8 +66,7 @@
       </form>
       <p id="answer-response" role="status" aria-live="polite"></p>
     </section>
-    <button id="preview-final" type="button">View final clue (testing)</button>
-    <button id="restart" type="button" hidden>Reset progress (testing)</button>
+    <button id="restart" type="button" hidden>Reset progress</button>
   </main>
   <script>
     // Clue content lives only in clues.json. Edit that file, not this script.
@@ -79,14 +76,13 @@
       const progress = el("progress"), currentClue = el("current-clue");
       const ending = el("final-clue"), endingText = el("final-clue-text");
       const gameScreen = el("game-screen"), restart = el("restart");
-      const previewButton = el("preview-final"), storageNote = el("storage-note");
+      const storageNote = el("storage-note");
       const answerForm = el("answer-form"), answerInput = el("killer-answer");
       const answerResponse = el("answer-response"), answerSubmit = el("answer-submit");
       let notifying = false, notified = false;
       const normalize = code => code.trim().replace(/\s+/g, " ").toUpperCase();
-      let ready = false, previewing = false, found = [], data, byId, storageKey;
+      let ready = false, found = [], data, byId, storageKey;
       form.hidden = true;
-      previewButton.hidden = true;
       progress.textContent = "Loading clues…";
       function announce(message, error = false) {
         response.textContent = message;
@@ -102,8 +98,7 @@
         catch { storageUnavailable(); }
       }
       function render() {
-        const finished = found.length === data.clues.length;
-        const complete = previewing || finished;
+        const complete = found.length === data.clues.length;
         const last = found.length ? byId.get(found[found.length - 1]) : null;
         progress.textContent = found.length + " of " + data.clues.length + " clues found";
         currentClue.hidden = !last;
@@ -111,14 +106,12 @@
         ending.hidden = !complete;
         endingText.textContent = complete ? data.finalClue : "";
         el("answer-label").textContent = data.finalAnswerPrompt;
-        answerForm.hidden = notified && !previewing;
-        if (notified && !previewing) answerResponse.textContent = data.successMessage;
+        answerForm.hidden = notified;
+        if (notified) answerResponse.textContent = data.successMessage;
         else if (!notifying) answerResponse.textContent = "";
         gameScreen.hidden = complete;
         form.hidden = complete;
         document.body.classList.toggle("is-complete", complete);
-        previewButton.hidden = finished;
-        previewButton.textContent = previewing ? "Back to clues (testing)" : "View final clue (testing)";
         restart.hidden = found.length === 0;
         if (complete) el("final-clue-heading").focus();
       }
@@ -138,15 +131,11 @@
       });
       answerForm.addEventListener("submit", async event => {
         event.preventDefault();
-        if (!ready || notifying || (!previewing && found.length !== data.clues.length)) return;
+        if (!ready || notifying || found.length !== data.clues.length) return;
         const answer = normalize(answerInput.value);
         if (!answer) { answerResponse.textContent = "Please enter your answer."; return; }
         if (!data.acceptedAnswers.some(value => normalize(value) === answer)) {
           answerResponse.textContent = "Not quite. Take another look at the clues and try again.";
-          return;
-        }
-        if (previewing) {
-          answerResponse.textContent = data.successMessage + " (Testing preview — no email sent.)";
           return;
         }
         if (notified) { answerResponse.textContent = data.successMessage; return; }
@@ -184,16 +173,9 @@
           answerSubmit.disabled = false;
         }
       });
-      previewButton.addEventListener("click", () => {
-        if (!ready || notifying) return;
-        previewing = !previewing;
-        render();
-        if (!previewing) input.focus();
-      });
       restart.addEventListener("click", () => {
-        if (!ready || notifying || !window.confirm("Clear your progress and start again?")) return;
+        if (!ready || notifying || !window.confirm("Reset all progress on this device? This clears every found clue and starts the mystery again.")) return;
         found = [];
-        previewing = false;
         notified = false;
         answerInput.value = "";
         answerResponse.textContent = "";
