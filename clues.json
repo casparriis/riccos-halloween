@@ -50,7 +50,7 @@
     {
       "id": "06",
       "clue": "Cocktail menu. Red letters",
-      "code": null,
+      "code": "TASTY",
       "next": "07",
       "starter": false,
       "location": "Cocktail menu on the bar",
@@ -58,8 +58,8 @@
     },
     {
       "id": "07",
-      "clue": "Find [Title], [page] [word]",
-      "code": null,
+      "clue": "Døde Sjæle by Nikolaj Gøgol, page 70, line 2, word 7",
+      "code": "DØDELIG",
       "next": "08",
       "starter": false,
       "location": "Bookcase",
