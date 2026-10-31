@@ -117,5 +117,6 @@
     "The Panther",
     "The killer is the Panther"
   ],
-  "successMessage": "Correct! You solved the mystery."
+  "successMessage": "Correct! You solved the mystery.",
+  "notificationEmail": "sluseholmen@riccos.dk"
 }
