@@ -150,6 +150,7 @@
           return;
         }
         if (notified) { answerResponse.textContent = data.successMessage; return; }
+        if (!data.notificationEmail) { answerResponse.textContent = data.successMessage + " Please tell the host in person."; return; }
         notifying = true;
         answerSubmit.disabled = true;
         answerResponse.textContent = data.successMessage + " Notifying the host…";
@@ -214,7 +215,7 @@
             typeof data.successMessage !== "string" ||
             !Array.isArray(data.acceptedAnswers) || !data.acceptedAnswers.length ||
             data.acceptedAnswers.some(a => typeof a !== "string" || !normalize(a)) ||
-            typeof data.notificationEmail !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.notificationEmail))
+            (data.notificationEmail !== undefined && (typeof data.notificationEmail !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.notificationEmail))))
           throw Error("Invalid final answer settings");
         const ids = new Set(), codes = new Set();
         for (const c of data.clues) {
