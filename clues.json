@@ -1,6 +1,6 @@
 {
   "gameVersion": "halloween-2026-vault-1",
-  "finalClue": "[TO COMPLETE: Write the final clue telling guests the passphrase to give to the host wearing the panther mask. The passphrase is not yet specified in the Vault.]",
+  "finalClue": "Find the panther. Tell him, \"Show me the light\".",
   "clues": [
     {
       "id": "01",
@@ -110,5 +110,12 @@
       "location": "Painting in main room",
       "answer": "It's a candle"
     }
-  ]
+  ],
+  "finalAnswerPrompt": "When you have the identity of the killer, enter it here:",
+  "acceptedAnswers": [
+    "Panther",
+    "The Panther",
+    "The killer is the Panther"
+  ],
+  "successMessage": "Correct! You solved the mystery."
 }
